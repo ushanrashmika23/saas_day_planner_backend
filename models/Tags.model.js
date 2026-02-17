@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { getRandomColor } = require('../utils/colorGenerator');
 
 const tagsSchema = new mongoose.Schema({
   name: {
@@ -13,7 +12,6 @@ const tagsSchema = new mongoose.Schema({
   },
   color: {
     type: String,
-    default: getRandomColor()
   }
 }, {
   timestamps: true
