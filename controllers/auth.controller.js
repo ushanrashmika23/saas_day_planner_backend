@@ -42,6 +42,27 @@ exports.register = async (req, res) => {
     }
 }
 
+// Validate token
+exports.validateToken = async (req, res) => {
+    try {
+        // If the request reaches here, the token is valid (verified by middleware)
+        res.status(200).json({
+            statusCode: 200,
+            message: 'Token is valid',
+            isValid: true,
+            user: {
+                id: req.user._id,
+                email: req.user.email,
+                username: req.user.username,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ statusCode: 500, message: 'Internal server error', isValid: false });
+    }
+}
+
 // User login
 exports.login = async (req, res) => {
     try {
@@ -152,7 +173,7 @@ exports.sendOtp = async (req, res) => {
         await existingUser.save();
         const data = { email: existingUser.email, otp };
         const encryptedData = encode(data);
-        await sendEmail(existingUser.email, 'Verify Your Email', '', verificationTemplate(existingUser.firstName, `${process.env.FRONTEND_URL}/verify?code=${encryptedData}`));
+        await sendEmail(existingUser.email, 'Verify Your Email', '', verificationTemplate(existingUser.firstName, `${process.env.FRONTEND_URL}/?code=${encryptedData}`));
         res.status(200).json({ statusCode: 200, message: 'OTP generated and sent successfully', data: { otp } });
     } catch (error) {
         console.error("Error sending OTP:", error);

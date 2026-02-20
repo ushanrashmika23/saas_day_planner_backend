@@ -17,7 +17,10 @@ router.post('/set-active', verifyToken, authController.setActive);
 router.post('/set-inactive', verifyToken, authController.setInactive);
 // Check username availability
 router.get('/check-username', authController.checkUsername);
-// Verify OTP
+// Validate token
+router.get('/validate', verifyToken, authController.validateToken);
+
+module.exports = router;
 router.post('/verify', authController.verifyEmail);
 
 module.exports = router;
