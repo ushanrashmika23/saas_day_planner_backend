@@ -55,4 +55,21 @@ const deleteProject = async (req, res) => {
     }
 };
 
-module.exports = { createProject, getAllProjects, getProjectById, updateProject, deleteProject };
+// SEARCH - Search projects by name
+const searchProjects = async (req, res) => {
+    try {
+        const { name } = req.query;
+        if (!name) {
+            return res.status(400).json({ statusCode: 400, message: 'Search query parameter "name" is required', data: null });
+        }
+        const projects = await Project.find({
+            userId: req.user._id,
+            name: { $regex: name, $options: 'i' }
+        }).populate('userId');
+        res.status(200).json({ statusCode: 200, message: 'Projects search completed successfully', data: projects });
+    } catch (error) {
+        res.status(500).json({ statusCode: 500, message: error.message, data: null });
+    }
+};
+
+module.exports = { createProject, getAllProjects, getProjectById, updateProject, deleteProject, searchProjects };

@@ -1,10 +1,17 @@
 const Task = require('../models/Task.model');
+const Tags = require('../models/Tags.model');
+const Project = require('../models/Project.model');
 
 // CREATE - Add a new task
 const createTask = async (req, res) => {
     try {
         const { title, description, completed, priority, tags, dueDate, dueTime, recurring, projectId } = req.body;
         const newTask = await Task.create({ title, description, completed, priority, tags, dueDate, dueTime, recurring, projectId, userId: req.user._id });
+        const tagIds = tags || [];
+        await Tags.updateMany({ _id: { $in: tagIds } }, { $inc: { taskCount: +1 } });
+        if (projectId) {
+            await Project.findByIdAndUpdate(projectId, { $inc: { taskCount: +1 } });
+        }
         res.status(201).json({ statusCode: 201, message: 'Task created successfully', data: newTask });
     } catch (error) {
         res.status(400).json({ statusCode: 400, message: error.message, data: null });
@@ -48,10 +55,28 @@ const deleteTask = async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
         if (!task) return res.status(404).json({ statusCode: 404, message: 'Task not found', data: null });
+        const tagIds = task.tags || [];
+        await Tags.updateMany({ _id: { $in: tagIds } }, { $inc: { taskCount: -1 } });
+        if (task.projectId) {
+            await Project.findByIdAndUpdate(task.projectId, { $inc: { taskCount: -1 } });
+        }
         res.status(200).json({ statusCode: 200, message: 'Task deleted successfully', data: null });
     } catch (error) {
         res.status(500).json({ statusCode: 500, message: error.message, data: null });
     }
 };
 
-module.exports = { createTask, getAllTasks, getTaskById, updateTask, deleteTask };
+// TOGGLE - Toggle task completion status
+const toggleTaskCompletion = async (req, res) => {
+    try {
+        const task = await Task.findOne({ _id: req.params.id, userId: req.user._id });
+        if (!task) return res.status(404).json({ statusCode: 404, message: 'Task not found', data: null });
+        task.completed = !task.completed;
+        await task.save();
+        res.status(200).json({ statusCode: 200, message: 'Task completion status toggled successfully', data: task });
+    } catch (error) {
+        res.status(400).json({ statusCode: 400, message: error.message, data: null });
+    }
+};
+
+module.exports = { createTask, getAllTasks, getTaskById, updateTask, deleteTask, toggleTaskCompletion };

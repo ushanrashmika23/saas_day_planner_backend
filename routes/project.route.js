@@ -11,6 +11,8 @@ router.use(isActiveUser);
 
 // Create new project
 router.post('/', projectController.createProject);
+// Search projects by name
+router.get('/search', projectController.searchProjects);
 // Get all projects
 router.get('/', projectController.getAllProjects);
 // Get project by ID

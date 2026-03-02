@@ -13,6 +13,8 @@ router.use(isActiveUser);
 router.post('/', taskController.createTask);
 // Get all tasks
 router.get('/', taskController.getAllTasks);
+// Toggle task completion
+router.patch('/:id/toggle', taskController.toggleTaskCompletion);
 // Get task by ID
 router.get('/:id', taskController.getTaskById);
 // Update task

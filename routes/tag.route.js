@@ -11,6 +11,8 @@ router.use(isActiveUser);
 
 // Create new tag
 router.post('/', tagController.createTag);
+// Search tags by name
+router.get('/search', tagController.searchTags);
 // Get all tags
 router.get('/', tagController.getAllTags);
 // Get tag by ID

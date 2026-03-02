@@ -55,4 +55,21 @@ const deleteTag = async (req, res) => {
     }
 };
 
-module.exports = { createTag, getAllTags, getTagById, updateTag, deleteTag };
+// SEARCH - Search tags by name
+const searchTags = async (req, res) => {
+    try {
+        const { name } = req.query;
+        if (!name) {
+            return res.status(400).json({ statusCode: 400, message: 'Search query parameter "name" is required', data: null });
+        }
+        const tags = await Tags.find({
+            userId: req.user._id,
+            name: { $regex: name, $options: 'i' }
+        }).populate('userId');
+        res.status(200).json({ statusCode: 200, message: 'Tags search completed successfully', data: tags });
+    } catch (error) {
+        res.status(500).json({ statusCode: 500, message: error.message, data: null });
+    }
+};
+
+module.exports = { createTag, getAllTags, getTagById, updateTag, deleteTag, searchTags };
